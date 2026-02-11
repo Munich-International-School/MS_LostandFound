@@ -26,11 +26,12 @@
             id="lost-found-iframe">
     </iframe>
     <script>
+        // Wait for DOM to be ready before adding event listeners
         window.addEventListener('DOMContentLoaded', function() {
             const iframe = document.getElementById('lost-found-iframe');
             
-            iframe.addEventListener('load', function() {
-                // After iframe loads, remove any edit badge that may have been added
+            // Function to remove edit badges
+            function removeEditBadges() {
                 // Look for common edit badge selectors
                 const selectors = [
                     '.edit-badge',
@@ -41,13 +42,39 @@
                     '.softr-edit-button'
                 ];
                 
+                let removed = false;
                 selectors.forEach(function(selector) {
                     const elements = document.querySelectorAll(selector);
-                    elements.forEach(function(element) {
-                        element.remove();
-                        console.log('Removed edit badge element:', selector);
-                    });
+                    if (elements.length > 0) {
+                        elements.forEach(function(element) {
+                            element.remove();
+                            removed = true;
+                        });
+                        console.log('Removed', elements.length, 'element(s) matching selector:', selector);
+                    }
                 });
+                
+                if (!removed) {
+                    console.log('No edit badge elements found to remove');
+                }
+            }
+            
+            // Remove badges after iframe loads
+            iframe.addEventListener('load', removeEditBadges);
+            
+            // Also watch for dynamically added edit badges using MutationObserver
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length > 0) {
+                        removeEditBadges();
+                    }
+                });
+            });
+            
+            // Start observing the document body for added nodes
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
             });
         });
     </script>
