@@ -42,33 +42,55 @@
                     '.softr-edit-button'
                 ];
                 
-                let removed = false;
+                let totalRemoved = 0;
                 selectors.forEach(function(selector) {
                     const elements = document.querySelectorAll(selector);
                     if (elements.length > 0) {
+                        const count = elements.length;
                         elements.forEach(function(element) {
                             element.remove();
-                            removed = true;
                         });
-                        console.log('Removed', elements.length, 'element(s) matching selector:', selector);
+                        console.log('Removed', count, 'element(s) matching selector:', selector);
+                        totalRemoved += count;
                     }
                 });
                 
-                if (!removed) {
+                if (totalRemoved === 0) {
                     console.log('No edit badge elements found to remove');
                 }
+                
+                return totalRemoved;
             }
             
             // Remove badges after iframe loads
             iframe.addEventListener('load', removeEditBadges);
             
-            // Also watch for dynamically added edit badges using MutationObserver
+            // Debounce function to limit how often removeEditBadges is called
+            let debounceTimer;
+            function debouncedRemoveEditBadges() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(removeEditBadges, 100);
+            }
+            
+            // Watch for dynamically added edit badges using MutationObserver
             const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
+                // Check if any of the added nodes could be edit badges
+                let shouldCheck = false;
+                for (let mutation of mutations) {
                     if (mutation.addedNodes.length > 0) {
-                        removeEditBadges();
+                        for (let node of mutation.addedNodes) {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                shouldCheck = true;
+                                break;
+                            }
+                        }
                     }
-                });
+                    if (shouldCheck) break;
+                }
+                
+                if (shouldCheck) {
+                    debouncedRemoveEditBadges();
+                }
             });
             
             // Start observing the document body for added nodes
