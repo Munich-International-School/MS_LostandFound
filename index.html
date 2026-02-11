@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MS Lost and Found</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            const iframe = document.querySelector('iframe');
+            
+            iframe.addEventListener('load', function() {
+                try {
+                    // Try to access the iframe's content window
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    
+                    // Remove the edit badge div if it exists
+                    const editBadge = iframeDoc.querySelector('.edit-badge, #edit-badge, [class*="edit-badge"], [id*="edit-badge"]');
+                    if (editBadge) {
+                        editBadge.remove();
+                    }
+                } catch (e) {
+                    // Cross-origin restriction - cannot access iframe content
+                    console.log('Cannot access iframe content due to cross-origin restrictions');
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <iframe src="https://lost-found-257a242a.base44.app/Home" 
+            title="MS Lost and Found"
+            allowfullscreen>
+    </iframe>
+</body>
+</html>
